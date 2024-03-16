@@ -46,6 +46,11 @@ func (m *intermediate) ReadMsg() ([]byte, error) {
 	}
 
 	size := binary.LittleEndian.Uint32(sizeBuf)
+
+	if size > 1<<30 { // can case memory exhaustion
+		return nil, fmt.Errorf("invalid message size: %d", size)
+	}
+
 	msg := make([]byte, int(size))
 	n, err = io.ReadFull(m.conn, msg)
 	if err != nil {
